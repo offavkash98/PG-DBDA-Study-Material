@@ -1,0 +1,35 @@
+
+public class CAR
+
+
+{
+
+	int model;
+	int make;
+	int year;
+
+	
+	
+  public CAR(int model,int make, int year ) 
+  
+  {
+	  
+	this.model = model;
+	this.make = make;
+	this.year = year;
+  }
+  
+	public int getmodel()
+	{
+		return model;
+		
+	}
+	public static void main(String[] args)
+	{
+		CAR c1 =new CAR(1250,2022,32-19-3032);
+		System.out.println(c1.getmodel());
+		
+		
+	}
+	
+}
