@@ -1,0 +1,10 @@
+marks=[10,20,30,40,50,60,70,80,90,100,110,120]
+print(marks)
+marks.append(40)
+print(marks)
+marks.extend([10,20,30,40,50])
+print(marks)
+marks.remove(40)
+print(marks)
+marks.pop(-3)
+print(marks)
