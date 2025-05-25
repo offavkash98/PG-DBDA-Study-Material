@@ -1,0 +1,274 @@
+1.) Explain order of execution of SQL.
+                                                 FROM/JOIN ==> WHERE ==> GROUP BY ==> HAVING ==> SELECT ==> DISTINCT ==> ORDER BY ==> LIMIT/OFFSET
+
+2.) What is difference between where and having?
+                                                 Feature	WHERE Clause						HAVING Clause
+						 Purpose	Filters individual rows before grouping	                Filters groups after grouping
+						 Usage		Used with SELECT, UPDATE, DELETE			Used only with GROUP BY
+						 Timing		Applied before GROUP BY					Applied after GROUP BY
+						 Aggregates	Cannot use aggregate functions				Can use aggregate functions
+						 Columns	Can reference any column				Typically references grouped columns or aggregates
+						 Performance	Generally more efficient				Less efficient (processes grouped data)
+						 Example	WHERE salary > 50000					HAVING AVG(salary) > 50000
+
+3.) What is the use of group by?
+						The GROUP BY clause in SQL groups rows that have the same values in one or more specified columns. It's often used with aggregate functions 						(like COUNT, SUM, AVG) to summarize data based on these groupings, allowing you to get insights like the total sales per region or the average 						age of users in each demographic. 
+					
+						Finding the total sales for each country:
+						You could use GROUP BY country and SUM(sales) to calculate the total sales for each country. 
+
+4.) Explain all types of joins in SQL?
+						SQL joins are used to combine rows from two or more tables based on related columns. 
+
+						1. INNER JOIN : Returns only matching rows from both tables
+							SELECT employees.name, departments.dept_name FROM employees INNER JOIN departments ON employees.dept_id = departments.id;
+
+						2. LEFT JOIN (or LEFT OUTER JOIN)
+			0+60				Returns all rows from the left table and matching rows from right table
+							If no match, NULL values are returned for right table columns
+							SELECT employees.name, departments.dept_name FROM employees LEFT JOIN departments ON employees.dept_id = departments.id;
+
+						3. RIGHT JOIN (or RIGHT OUTER JOIN)
+							Returns all rows from the right table and matching rows from left table
+							If no match, NULL values are returned for left table columns
+							SELECT employees.name, departments.dept_name FROM employees RIGHT JOIN departments ON employees.dept_id = departments.id;
+
+						4. FULL JOIN (or FULL OUTER JOIN)
+							Returns all rows when there's a match in either left or right table
+							Combines results of both LEFT and RIGHT joins
+							Where no match, NULL values are returned for non-matching side
+							SELECT employees.name, departments.dept_name FROM employees FULL JOIN departments ON employees.dept_id = departments.id;
+
+						5. CROSS JOIN
+							Returns Cartesian product of both tables (all possible combinations)
+							No join condition is specified
+							Can produce very large result sets
+							SELECT employees.name, departments.dept_name FROM employees CROSS JOIN departments;
+
+						6. SELF JOIN
+							A table is joined with itself
+							Useful for comparing rows within the same table
+							SELECT e1.name AS employee, e2.name AS manager FROM employees e1 JOIN employees e2 ON e1.manager_id = e2.id;
+
+5.) What are triggers in SQL?
+						A trigger is a special kind of stored procedure that automatically executes (or "fires") in response to specific events on a particular 						table or view in a database. Triggers are used to enforce business rules, maintain data integrity, log changes, and perform automated 							actions when data is modified.
+
+						Syntax for Creating a Trigger:
+							CREATE TRIGGER trigger_name
+							[BEFORE | AFTER | INSTEAD OF] [INSERT | UPDATE | DELETE]
+							ON table_name
+							[FOR EACH ROW | FOR EACH STATEMENT]
+							AS
+							BEGIN
+							    -- SQL statements to execute
+							END;
+
+						Use Cases: Audit logging, Data Validation, Enforcing Referential Integrity
+
+6.) What is stored procedure in SQL?
+						A stored procedure is a precompiled collection of SQL statements stored in the database that can be executed as a single unit. It acts like 						a function in programming—accepting parameters, performing operations, and returning results.
+
+						Basic store Procedure:
+						CREATE PROCEDURE GetEmployeeByID
+ 						   @emp_id INT
+						AS
+						BEGIN
+ 						   SELECT * FROM employees WHERE id = @emp_id;
+						END;
+
+7.) Explain all types of window functions?
+						Window functions perform calculations across a set of table rows related to the current row, without collapsing rows (unlike GROUP BY).
+						1. ROW_NUMBER()
+							Purpose: Assigns a unique sequential number to each row within a partition, starting at 1.
+							Duplicates: Different rows always get different numbers, even if values are the same.
+							Use Case: Finding the first or last record per group.
+								SELECT name, department, salary, ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) as row_num FROM employees;
+
+						2. RANK()
+							Purpose: Assigns a rank to each row within a partition, with gaps in ranking for duplicate values.
+							Duplicates: Same values get the same rank; the next rank is skipped accordingly.
+								SELECT name, department, salary, RANK() OVER (PARTITION BY department ORDER BY salary DESC) as rank FROM employees;
+
+						3. DENSE_RANK()
+							Purpose: Like RANK(), but does not skip ranks after ties.
+							Duplicates: Same values get the same rank; no gaps in subsequent ranks.
+							SELECT name, department, salary, DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) as dense_rank FROM employees;
+
+						4. LEAD()
+							Purpose: Accesses data from the next row in the partition.
+							Use Case: Compare current row to future row (e.g., salary change next month).
+								SELECT name, salary, LEAD(salary, 1, 0) OVER (ORDER BY salary) as next_salary FROM employees;
+
+						5. LAG()
+							Purpose: Accesses data from the previous row in the partition.
+							Use Case: Compare current row to past row (e.g., salary change from last month).
+								SELECT name, salary, LAG(salary, 1, 0) OVER (ORDER BY salary) as previous_salary FROM employees;
+
+
+8.) What is difference between Delete and Truncate and Drop ?
+					Parameter	DELETE						DROP					TRUNCATE
+					Type		DML						DDL					DDL
+					Purpose		Deletes specific rows based on condition	Deletes the entire table or database	Deletes all rows but retains table structure
+					Syntax		DELETE FROM table_name WHERE condition;		DROP TABLE table_name;			TRUNCATE TABLE table_name;
+					Rollback 	Can be Rollback					Cannot be Rollback			Cannot be Rollback
+					Data Removal	Removes selected rows				Removes table and data completely	Removes all rows
+					Efficiency	Slower, as each row is processed individually	Instant removal, affecting schema	Faster than DELETE but slower than DROP
+					Triggers	Fires triggers					Does not fire triggers			Does not fire triggers
+
+
+9.) What is difference between DML, DDL and DCL?
+					https://media.geeksforgeeks.org/wp-content/uploads/20210920153429/new.png
+					1. DDL (Data Definition Language) Commands:
+ 					DDL commands focus on defining and managing the structure of the database. They enable you to create, modify, and delete database objects such as 					tables, indexes, and schemas. Examples of DDL commands include CREATE, ALTER, and DROP.
+
+					2. DML (Data Manipulation Language) Commands:
+ 					DML commands are concerned with the manipulation of data within the database. They allow you to retrieve, add, modify, and delete data from tables. 					Commonly used DML commands include SELECT, INSERT, UPDATE, and DELETE.
+			
+					3. DCL (Data Control Language) Commands:
+					DCL commands deal with managing access and permissions within the database. They grant or revoke specific privileges to users. Examples of DCL 						commands are GRANT and REVOKE.
+
+					4. DQL - Data Query Language
+					DQL statements are used for performing queries on the data within schema objects. The purpose of the DQL Command is to get some schema relation 					based on the query passed to it. 
+
+					5. TCL - Transaction Control Language
+					Transactions group a set of tasks into a single execution unit. Each transaction begins with a specific task and ends when all the tasks in the 					group are successfully completed. If any of the tasks fail, the transaction fails. Therefore, a transaction has only two results: success or 						failure.
+
+10.) What are aggregate function and when do we use them? explain with few example.
+					Aggregate functions, in the context of SQL, are functions that operate on a set of values and return a single value representing an aggregate 						result. They are used to summarize data in various ways, such as calculating sums, averages, counts, minimums, and maximums. 
+
+					The most commonly used SQL aggregate functions are:
+						MIN() - returns the smallest value within the selected column
+						MAX() - returns the largest value within the selected column
+						COUNT() - returns the number of rows in a set
+						SUM() - returns the total sum of a numerical column
+						AVG() - returns the average value of a numerical column
+
+					-- Count total employees
+					SELECT COUNT(*) AS total_employees FROM employees;
+
+					-- Total salary per department
+					SELECT department, SUM(salary) AS total_salary FROM employees GROUP BY department;
+
+					-- Departments with more than 5 employees
+					SELECT department, COUNT(*) AS employee_count FROM employees GROUP BY department HAVING COUNT(*) > 5;
+
+11.) Which is faster between CTE and Subquery?
+					In most scenarios, CTEs (Common Table Expressions) and subqueries perform similarly in terms of speed, with the actual performance difference 						depending on the database engine and the specific query. However, CTEs can offer better performance when the same result set is accessed multiple 					times within a query because they can be optimized more efficiently. Subqueries may be faster for straightforward, single-use cases. 
+
+12.) What are constraints and types of Constraints?	
+					Constraints in the context of databases are rules that limit or restrict the type of data that can be stored in a table. They ensure data accuracy, 					integrity, and consistency.	
+					
+					Types of Constraints :
+						PRIMARY KEY → For unique row identification (e.g., user_id).
+						FOREIGN KEY → To maintain relationships between tables (e.g., order.customer_id → customer.id).
+						UNIQUE → For columns like email, username.
+						NOT NULL → For mandatory fields (e.g., name, password).
+						CHECK → For business rules (e.g., salary > 0).
+						DEFAULT → For automatic values (e.g., created_at TIMESTAMP DEFAULT NOW()).
+
+13.) Types of Keys?
+					Primary Key (PK) → Best for unique row identification (e.g., user_id).
+					Foreign Key (FK) → To link tables (e.g., orders.customer_id → customers.id).
+					Unique Key → For columns like email, phone (allows one NULL).
+					Composite Key → When a single column isn’t enough (e.g., order_id + product_id).
+					Surrogate Key → When no natural key exists (e.g., auto-increment id).
+					Natural Key → If a real-world identifier is reliable (e.g., ISBN for books).	
+
+14.) Different types of Operators ?
+					SQL operators are symbols or keywords used to perform operations on data. They are essential for filtering, comparing, and manipulating data in 					queries. 
+						Arithmetic		+, -, *, /, %			Calculations
+						Comparison		=, <>, >, <, LIKE, IN		Filtering data
+						Logical			AND, OR, NOT, EXISTS		Combining conditions
+						Bitwise			&, `				, ^, ~, <<, >>`	Low-level bit operations
+						Assignment		=, :=				Variable assignment
+						Concatenation		+, `				, CONCAT()`	String joining
+						Special			IS NULL, DISTINCT, CASE		Advanced filtering & logic
+
+15.) Difference between Group By and Where?
+					WHERE Clause:
+						The WHERE clause filters rows in a table based on a specified condition. It's used to select specific rows that meet certain criteria.
+					GROUP BY Clause:
+						The GROUP BY clause groups rows that have the same value in one or more specified columns into groups. It's often used in conjunction with 						aggregate functions (like SUM, AVG, COUNT, etc.) to perform calculations on these groups.
+
+16.) What are Views?
+					A view is a virtual table created by a SQL query. It does not store data physically but acts as a saved query that dynamically retrieves data from 					underlying tables whenever accessed.
+
+18.) What is difference between varchar and nvarchar ?
+					NVARCHAR uses Unicode, allowing it to store characters from multiple languages and scripts. 
+					VARCHAR stores each character using a single byte.
+					NVARCHAR columns typically consume twice as much storage space as equivalent VARCHAR columns.
+
+19.) What is difference between char and nchar ?
+						1.CHAR                                       
+							- Fixed-length, meaning it occupies the same amount of space regardless of the actual data stored. 
+							- Uses a single-byte character set, such as ASCII, which may not be sufficient for storing characters from all languages. 
+							- Often used for storing fixed-length data like IDs or codes. 
+						2.NCHAR 
+							- Fixed-length, like CHAR, but uses Unicode, which allows it to store a wider range of characters, including non-English characters. 
+							- Can store characters from various languages, making it suitable for internationalized applications. 
+							- Generally used when you need to store text data in multiple languages or when you're unsure of the character set of the data. 
+
+21.) What is an index? Explain its different types.
+						An index is a data structure that improves the speed of data retrieval in a database by providing a shortcut to locate specific rows. It can 						be thought of as a table of contents for the database, pointing to where specific values are stored.
+	
+						1. Clustered Index
+							Determines the physical storage order of data in a table
+							Only one per table (typically on the primary key)
+							Faster for range queries and sorting operations
+
+						2. Non-Clustered Index
+							Separate structure from table data
+							Contains sorted key values + pointers to actual rows
+							Multiple allowed per table (SQL Server: 999, MySQL: 64) 
+
+22.) List the different types of relationships in SQL.
+					In SQL, there are five main types of relationships:
+					One-to-One (1:1):
+						A single record in one table is linked to a single record in another table. For example, a person might have one passport. 
+					One-to-Many (1:N):
+						A single record in one table can be linked to multiple records in another table. For example, a customer can have many orders. 
+					Many-to-One (N:1):
+						Multiple records in one table can be linked to a single record in another table. For example, many students can be enrolled in one course. 
+					Many-to-Many (M:N):
+						Multiple records in one table can be linked to multiple records in another table. For example, a student can enroll in multiple courses, and 						each course can have many students. 
+
+23.) Differentiate between UNION and UNION ALL.
+					UNION		Combines results from multiple queries and removes duplicate rows
+					UNION ALL	Combines results from multiple queries and keeps all rows (including duplicates)
+
+24.) How many types of clauses in SQL?
+					The sql clauses can help filter out the data according to the users' needs.
+					The main clauses are SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY, INSERT, UPDATE, DELETE, and JOIN.
+
+27.) Difference between Primary Key and Secondary Key?
+					A primary key uniquely identifies each row in a table, acting as the main identifier. 
+					A secondary key (also known as an alternate key or candidate key) is any other unique column or set of columns that can also uniquely identify a 					row, but is not the primary key. 
+
+29.) Find the second highest salary of an employee?
+					1. SQL Query (using LIMIT and OFFSET): 
+						SELECT DISTINCT salary FROM Employees ORDER BY salary DESC LIMIT 1 OFFSET 1;
+
+					2. Alternative Approach (using subquery):
+						SELECT MAX(salary) FROM Employees WHERE salary < (SELECT MAX(salary) FROM Employees);
+
+30.) Difference between Function and Store procedure ?
+					stored procedures and functions are both pre-compiled blocks of code, but they serve different purposes. 
+						Stored procedures are designed for executing a sequence of SQL statements, often including DML statements (INSERT, UPDATE, DELETE), and they 						don't necessarily return a value. 
+
+						Functions, on the other hand, are designed to return a single value based on input parameters and typically focus on calculations or 							transformations, 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
